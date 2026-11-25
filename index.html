@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PorDee (พอดี) — บริหารเงินรายวัน หารบิลไว ออมเศษเงินอัตโนมัติ</title>
+  <link rel="icon" type="image/png" href="assets/pordee-icon.png">
+  <link rel="apple-touch-icon" href="assets/pordee-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <!-- Left Navigation Rail: Deep Sakon Nakhon Kram Indigo -->
+    <aside class="kram-rail" aria-label="เมนูหลักของแอปพลิเคชัน">
+      <div class="mudmee-strip" aria-hidden="true"></div>
+
+      <div class="brand-block">
+        <div class="brand-row">
+          <!-- Full-Bleed Iconic Mascot Mark (Hugs container edge-to-edge with zero white space) -->
+          <div class="brand-mark">
+            <img src="assets/pordee-icon.png" alt="ไอคอนน้องคราม PorDee (พอดี)" class="brand-mark-img" width="56" height="56">
+          </div>
+          <div>
+            <p class="brand-title">PorDee · พอดี</p>
+            <p class="brand-sub">น้องครามคู่ใจวัยมหาลัย</p>
+          </div>
+        </div>
+        <p class="brand-tagline">ใช้พอดีวัน หารพอดีคน ออมพอดีเป้า · แรงบันดาลใจจากภูมิปัญญาผ้าครามสกลนคร</p>
+      </div>
+
+      <nav class="rail-nav" role="tablist" aria-label="เลือกฟีเจอร์หลัก">
+        <button
+          type="button"
+          class="nav-tab"
+          role="tab"
+          id="tab-btn-allowance"
+          aria-selected="true"
+          aria-controls="panel-allowance"
+          data-tab="allowance"
+        >
+          <span class="nav-tab-main">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect x="3" y="4" width="18" height="17" rx="2"/>
+              <path d="M16 2v4M8 2v4M3 10h18"/>
+              <path d="M8 15h4M8 18h8"/>
+            </svg>
+            <span>งบใช้ได้วันนี้</span>
+          </span>
+          <span class="nav-pill" id="nav-pill-today">฿0</span>
+        </button>
+
+        <button
+          type="button"
+          class="nav-tab"
+          role="tab"
+          id="tab-btn-split"
+          aria-selected="false"
+          aria-controls="panel-split"
+          data-tab="split"
+        >
+          <span class="nav-tab-main">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M4 3h16v18l-2.5-1.8L15 21l-3-1.8L9 21l-2.5-1.8L4 21V3z"/>
+              <path d="M8 8h8M8 12h8M8 16h5"/>
+            </svg>
+            <span>หารบิล PromptPay</span>
+          </span>
+          <span class="nav-pill" id="nav-pill-split">0 คน</span>
+        </button>
+
+        <button
+          type="button"
+          class="nav-tab"
+          role="tab"
+          id="tab-btn-savings"
+          aria-selected="false"
+          aria-controls="panel-savings"
+          data-tab="savings"
+        >
+          <span class="nav-tab-main">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M7 7h10l1.5 11a2 2 0 0 1-2 2.2H7.5a2 2 0 0 1-2-2.2L7 7z"/>
+              <path d="M9 7V5a3 3 0 0 1 6 0v2"/>
+              <path d="M12 11v5M9.5 13.5h5"/>
+            </svg>
+            <span>กระปุกออมเศษเงิน</span>
+          </span>
+          <span class="nav-pill" id="nav-pill-savings">฿0</span>
+        </button>
+      </nav>
+
+      <section class="rail-summary" aria-label="สรุปภาพรวมเดือนนี้">
+        <h2 class="rail-summary-title">ภาพรวมรอบเดือนปัจจุบัน (วันที่ 25/30)</h2>
+        <div class="rail-stat-row">
+          <span>งบผันแปรคงเหลือ</span>
+          <strong id="rail-rem-budget">฿0</strong>
+        </div>
+        <div class="rail-stat-row">
+          <span>ออมเศษเงินสะสม</span>
+          <strong id="rail-roundup-total">฿0</strong>
+        </div>
+        <div class="rail-stat-row">
+          <span>บิลรอเพื่อนโอน</span>
+          <strong id="rail-pending-split">฿0</strong>
+        </div>
+      </section>
+
+      <div class="rail-heritage-note">
+        ต้นแบบนวัตกรรมการเงินสำหรับนักศึกษา (ข้อมูลจำลองเพื่อการสาธิต · ไม่รับฝากหรือถือครองเงินจริง)
+      </div>
+    </aside>
+
+    <!-- Main Workspace Area -->
+    <div class="workspace-col">
+      <!-- Top Bar: Demo Persona Switcher + Non-Custodial Explainer -->
+      <header class="topbar">
+        <div class="topbar-controls">
+          <label for="persona-select" class="persona-label">ข้อมูลจำลองสาธิต:</label>
+          <select id="persona-select" class="select-control" aria-label="เลือกโปรไฟล์นักศึกษาตัวอย่าง">
+            <option value="tonkla">ต้นกล้า — ปี 3 วิศวะฯ (งบสมดุล มีวินัย)</option>
+            <option value="praemai">แพรไหม — ปี 2 บริหารฯ (ปลายเดือนตึงมือ)</option>
+            <option value="pun">ปั้น — ปี 4 ฟรีแลนซ์+เรียน (เน้นออมคูณสอง)</option>
+          </select>
+
+          <button type="button" id="btn-reset-demo" class="btn btn-secondary btn-sm">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M3 12a9 9 0 1 0 3-6.7L3 8"/>
+              <path d="M3 3v5h5"/>
+            </svg>
+            <span>รีเซ็ตค่าเริ่มต้น</span>
+          </button>
+        </div>
+
+        <div class="topbar-right">
+          <button
+            type="button"
+            id="btn-toggle-arch"
+            class="btn btn-subtle btn-sm"
+            aria-expanded="false"
+            aria-controls="arch-drawer"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+              <path d="M9 12l2 2 4-4"/>
+            </svg>
+            <span>ทำงานอย่างไรโดยไม่ใช่ธนาคาร?</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- Expandable Non-Custodial Explanation Drawer (Great for Professor Q&A!) -->
+      <section id="arch-drawer" class="architecture-drawer" hidden aria-label="หลักการทำงานแบบไม่ถือครองเงิน">
+        <div class="arch-grid">
+          <div class="arch-item">
+            <h3>ไม่พักเงินไว้ที่ตัวกลาง (Non-Custodial)</h3>
+            <p>PorDee ทำหน้าที่คำนวณแผนการใช้เงินและสร้างรหัสมาตรฐาน EMVCo PromptPay เท่านั้น เงินโอนเข้าบัญชีธนาคารของผู้ใช้โดยตรง จึงไม่เข้าข่ายธุรกิจรับฝากเงินหรือ e-Money</p>
+          </div>
+          <div class="arch-item">
+            <h3>เพื่อนจ่ายผ่านลิงก์ได้โดยไม่ต้องโหลดแอป</h3>
+            <p>ฟีเจอร์หารบิลสร้าง QR PromptPay ผูกเบอร์โทรหรือเลขประจำตัวผู้สำรองจ่าย พร้อมข้อความสรุปส่งเข้ากลุ่ม LINE ให้เพื่อนสแกนด้วยแอปธนาคารที่มีอยู่ได้ทันที</p>
+          </div>
+          <div class="arch-item">
+            <h3>กระปุกผ้าครามจำลอง + โอนเก็บจริงปลายสัปดาห์</h3>
+            <p>ทุกรายจ่ายคำนวณเศษเงินสะสมไว้ในกระปุกเป้าหมาย เมื่อครบยอดที่ต้องการ ผู้ใช้กดสร้าง QR เพื่อโอนเข้าบัญชีออมทรัพย์ดอกเบี้ยสูงของตนเองได้ในคลิกเดียว</p>
+          </div>
+        </div>
+      </section>
+
+      <main class="workspace-main">
+        <!-- ================================================================
+             PANEL 1: งบใช้ได้วันนี้ (Daily Allowance & Kram Loom Runway)
+             ================================================================ -->
+        <section
+          id="panel-allowance"
+          class="tab-panel"
+          role="tabpanel"
+          aria-labelledby="tab-btn-allowance"
+        >
+          <div class="view-header">
+            <div class="view-header-with-mascot">
+              <div class="mascot-emblem">
+                <img src="assets/pordee-icon.png" alt="มาสคอตคนสวยน้องคราม PorDee" class="mascot-emblem-img" width="84" height="84">
+              </div>
+              <div>
+                <h1>งบใช้ได้วันนี้</h1>
+                <p class="view-subtitle">หักค่าหอพัก ค่าคงที่ และเงินออมพื้นฐานออกก่อน แล้วคำนวณวงเงินที่ใช้ได้จริงต่อวันแบบยืดหยุ่นตามยอดคงเหลือ</p>
+                <p class="mascot-coach-line" id="mascot-coach-line">น้องครามพอดี: วันนี้ยังใช้งบได้สบายๆ ทุกมื้อที่บันทึกจะช่วยเก็บเศษเงินเข้ากระปุกให้อัตโนมัติเลยนะ</p>
+              </div>
+            </div>
+            <div>
+              <button
+                type="button"
+                id="btn-toggle-budget-edit"
+                class="btn btn-secondary"
+                aria-expanded="false"
+                aria-controls="budget-editor-drawer"
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3"/>
+                  <path d="M1 14h6M9 8h6M17 16h6"/>
+                </svg>
+                <span>ปรับตั้งค่างบเดือนนี้</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="allowance-ledger-shell">
+            <!-- Live Deduction Formula Strip -->
+            <div class="formula-strip" aria-label="สมการคำนวณงบผันแปรคงเหลือ">
+              <div class="formula-cell">
+                <span class="formula-label">รายรับทั้งเดือน</span>
+                <span class="formula-val" id="fm-income">฿0</span>
+              </div>
+              <div class="formula-cell">
+                <span class="formula-label">หักค่าคงที่ (หอ/เน็ต) <span class="formula-op">−</span></span>
+                <span class="formula-val" id="fm-fixed">฿0</span>
+              </div>
+              <div class="formula-cell">
+                <span class="formula-label">หักออมพื้นฐาน <span class="formula-op">−</span></span>
+                <span class="formula-val" id="fm-save">฿0</span>
+              </div>
+              <div class="formula-cell">
+                <span class="formula-label">ใช้ไปแล้ว (วันที่ 1–24) <span class="formula-op">−</span></span>
+                <span class="formula-val" id="fm-past-spent">฿0</span>
+              </div>
+              <div class="formula-cell">
+                <span class="formula-label">งบคงเหลือ 6 วันสุดท้าย <span class="formula-op">=</span></span>
+                <span class="formula-val" id="fm-pool-left">฿0</span>
+              </div>
+            </div>
+
+            <!-- Primary Readout + Signature 30-Day Kram Loom Runway -->
+            <div class="allowance-core-grid">
+              <div class="today-readout-pane">
+                <div>
+                  <div class="today-heading-row">
+                    <h2>คงเหลือใช้ได้วันนี้</h2>
+                    <span id="today-status-badge" class="status-badge status-ok">พอดีตามแผน</span>
+                  </div>
+                  <p class="today-big-amount" id="today-remaining-display">฿0.00</p>
+                </div>
+
+                <div class="today-sub-breakdown">
+                  <div class="today-sub-row">
+                    <span>โควตาตั้งต้นวันนี้</span>
+                    <strong class="num" id="today-quota-display">฿0.00</strong>
+                  </div>
+                  <div class="today-sub-row">
+                    <span>จ่ายไปแล้ววันนี้</span>
+                    <strong class="num" id="today-spent-display">฿0.00</strong>
+                  </div>
+                  <div class="today-sub-row">
+                    <span>ถ้าหยุดจ่ายตอนนี้ งบพรุ่งนี้จะเป็น</span>
+                    <strong class="num" id="tomorrow-projection-display">฿0.00 / วัน</strong>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Signature Move: แถบทอวันพอดี (30-Day Kram Loom Runway) -->
+              <div class="loom-runway-pane">
+                <div class="loom-header">
+                  <h2>แถบทอวันพอดี 30 วัน</h2>
+                  <div class="loom-legend" aria-hidden="true">
+                    <span><i class="legend-dot" style="background: var(--kram-mid);"></i>อยู่ในงบ</span>
+                    <span><i class="legend-dot" style="background: var(--amber-warn);"></i>เกินงบวันนั้น</span>
+                    <span><i class="legend-dot" style="background: var(--leaf-ok);"></i>วันนี้ (วันที่ 25)</span>
+                    <span><i class="legend-dot" style="background: var(--border-subtle);"></i>วันที่เหลือ</span>
+                  </div>
+                </div>
+
+                <div
+                  id="loom-shuttle-frame"
+                  class="loom-shuttle-frame"
+                  role="group"
+                  aria-label="กราฟแท่งการใช้เงินรายวันตลอด 30 วัน คลิกแต่ละวันเพื่อดูรายละเอียด"
+                ></div>
+
+                <div class="loom-inspector-bar" id="loom-inspector-bar" aria-live="polite">
+                  <span id="loom-inspect-label">แตะหรือเลื่อนเมาส์ที่เส้นด้ายแต่ละวันเพื่อดูยอดใช้จ่ายเทียบโควตา</span>
+                  <strong class="num" id="loom-inspect-amount">วันที่ 25 พ.ย. (วันนี้)</strong>
+                </div>
+              </div>
+            </div>
+
+            <!-- Inline Monthly Budget Editor -->
+            <form id="budget-editor-drawer" class="budget-editor-drawer" hidden>
+              <div class="budget-editor-grid">
+                <div class="field-group">
+                  <label for="inp-monthly-income">รายรับ/เงินรายเดือน (บาท)</label>
+                  <input type="number" id="inp-monthly-income" class="input-control num" min="500" step="100" required>
+                </div>
+                <div class="field-group">
+                  <label for="inp-fixed-dorm">ค่าหอพัก + น้ำไฟ (บาท)</label>
+                  <input type="number" id="inp-fixed-dorm" class="input-control num" min="0" step="100" required>
+                </div>
+                <div class="field-group">
+                  <label for="inp-fixed-other">ค่าเน็ต + เดินทางคงที่ (บาท)</label>
+                  <input type="number" id="inp-fixed-other" class="input-control num" min="0" step="50" required>
+                </div>
+                <div class="field-group">
+                  <label for="inp-base-save">หักออมต้นเดือน (บาท)</label>
+                  <input type="number" id="inp-base-save" class="input-control num" min="0" step="50" required>
+                </div>
+                <div>
+                  <button type="submit" class="btn btn-primary" style="width: 100%;">คำนวณงบใหม่ทันที</button>
+                </div>
+              </div>
+            </form>
+          </div>
+
+          <!-- Expense Logger + Today/Recent Ledger -->
+          <div class="work-split-2col">
+            <div class="work-panel">
+              <div class="panel-header">
+                <h2>บันทึกรายจ่ายวันนี้</h2>
+                <span class="status-badge status-neutral" id="active-rule-chip">ปัดเศษหลัก 10 · ×1</span>
+              </div>
+              <div class="panel-body">
+                <div class="preset-chips" aria-label="ตัวเลือกรายจ่ายด่วนรอบมหาวิทยาลัย">
+                  <button type="button" class="chip-btn" data-quick-title="ข้าวราดแกงโรงอาหาร" data-quick-cat="อาหาร" data-quick-amt="45">ข้าวแกง 45฿</button>
+                  <button type="button" class="chip-btn" data-quick-title="อเมริกาโน่เย็นหน้ามอ" data-quick-cat="เครื่องดื่ม" data-quick-amt="55">กาแฟเย็น 55฿</button>
+                  <button type="button" class="chip-btn" data-quick-title="สองแถวเข้าเมืองสกล" data-quick-cat="เดินทาง" data-quick-amt="25">สองแถว 25฿</button>
+                  <button type="button" class="chip-btn" data-quick-title="ถ่ายเอกสารชีทสอบ" data-quick-cat="การเรียน" data-quick-amt="38">ชีทเรียน 38฿</button>
+                </div>
+
+                <form id="expense-form" class="form-stack" novalidate>
+                  <div class="field-group">
+                    <label for="exp-title">รายการใช้จ่าย</label>
+                    <input type="text" id="exp-title" class="input-control" placeholder="เช่น ข้าวมันไก่พิเศษ, วินมอเตอร์ไซค์" required maxlength="60">
+                  </div>
+
+                  <div class="form-row-2">
+                    <div class="field-group">
+                      <label for="exp-amount">จำนวนเงิน (บาท)</label>
+                      <input type="number" id="exp-amount" class="input-control num" placeholder="45" min="1" max="50000" step="0.5" required>
+                    </div>
+                    <div class="field-group">
+                      <label for="exp-category">หมวดหมู่</label>
+                      <select id="exp-category" class="select-control">
+                        <option value="อาหาร">อาหาร</option>
+                        <option value="เครื่องดื่ม">เครื่องดื่ม / คาเฟ่</option>
+                        <option value="เดินทาง">เดินทาง</option>
+                        <option value="การเรียน">หนังสือ / การเรียน</option>
+                        <option value="ของใช้">ของใช้ส่วนตัว</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div class="roundup-live-preview" id="roundup-live-preview">
+                    <span>ออมเศษเงินเข้ากระปุกอัตโนมัติ:</span>
+                    <strong class="num" id="roundup-preview-val">+฿0.00</strong>
+                  </div>
+
+                  <p id="expense-error" class="form-error" hidden></p>
+
+                  <button type="submit" class="btn btn-primary">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <path d="M12 5v14M5 12h14"/>
+                    </svg>
+                    <span>บันทึกรายจ่าย + หยอดกระปุกเศษเงิน</span>
+                  </button>
+                </form>
+              </div>
+            </div>
+
+            <!-- Expense Ledger Table -->
+            <div class="work-panel">
+              <div class="panel-header">
+                <h2>สมุดรายจ่ายวันนี้และล่าสุด</h2>
+                <div>
+                  <label for="filter-category" class="sr-only">กรองตามหมวดหมู่</label>
+                  <select id="filter-category" class="select-control" style="height: 32px; font-size: var(--text-xs);">
+                    <option value="all">ทุกหมวดหมู่</option>
+                    <option value="อาหาร">อาหาร</option>
+                    <option value="เครื่องดื่ม">เครื่องดื่ม / คาเฟ่</option>
+                    <option value="เดินทาง">เดินทาง</option>
+                    <option value="การเรียน">หนังสือ / การเรียน</option>
+                    <option value="ของใช้">ของใช้ส่วนตัว</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="table-scroll">
+                <table class="ledger-table" aria-label="รายการใช้จ่ายล่าสุด">
+                  <thead>
+                    <tr>
+                      <th>รายการ</th>
+                      <th>หมวด</th>
+                      <th data-num>จ่ายจริง</th>
+                      <th data-num>ออมเศษเงิน</th>
+                      <th style="width: 48px;"><span class="sr-only">ลบ</span></th>
+                    </tr>
+                  </thead>
+                  <tbody id="expense-tbody"></tbody>
+                </table>
+              </div>
+              <div id="expense-empty" class="empty-state-box" hidden>
+                <strong>ยังไม่มีรายการในหมวดหมู่นี้</strong>
+                <p>ลองกดปุ่มตัวเลือกรายจ่ายด่วนทางซ้ายมือ หรือกรอกรายการอาหารเพื่อดูระบบคำนวณงบวันนี้และเศษเงินออมอัตโนมัติ</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================================================================
+             PANEL 2: หารบิลเพื่อน + PromptPay QR (Smart Split Bill)
+             ================================================================ -->
+        <section
+          id="panel-split"
+          class="tab-panel"
+          role="tabpanel"
+          aria-labelledby="tab-btn-split"
+          hidden
+        >
+          <div class="view-header">
+            <div>
+              <h1>หารบิลเพื่อนด้วย PromptPay QR</h1>
+              <p class="view-subtitle">แยกตามเมนูที่แต่ละคนสั่งหรือหารเท่ากัน คำนวณ VAT / Service Charge ครบ พร้อมสร้าง QR มาตรฐาน EMVCo สแกนจ่ายได้จริง</p>
+            </div>
+            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+              <button type="button" id="btn-load-shabu" class="btn btn-secondary btn-sm">โหลดบิลตัวอย่าง: ชาบูริมหนองหาร</button>
+              <button type="button" id="btn-load-cafe" class="btn btn-secondary btn-sm">โหลดบิลตัวอย่าง: คาเฟ่ติวสอบ</button>
+            </div>
+          </div>
+
+          <div class="split-layout">
+            <!-- Left: Bill Setup & Item Assignment -->
+            <div class="work-panel">
+              <div class="panel-header">
+                <h2>ตั้งค่าบิลและเลือกคนหาร</h2>
+                <div class="segmented-switch" role="group" aria-label="โหมดการหารบิล">
+                  <button type="button" class="seg-btn" id="mode-itemized-btn" aria-pressed="true">แยกตามเมนูที่กิน</button>
+                  <button type="button" class="seg-btn" id="mode-equal-btn" aria-pressed="false">หารเท่ากันทุกคน</button>
+                </div>
+              </div>
+
+              <div class="panel-body" style="border-bottom: 1px solid var(--border-subtle);">
+                <div class="form-row-2">
+                  <div class="field-group">
+                    <label for="bill-title-inp">ชื่อร้าน / มื้ออาหาร</label>
+                    <input type="text" id="bill-title-inp" class="input-control" placeholder="เช่น ชาบูริมหนองหาร">
+                  </div>
+                  <div class="field-group">
+                    <label for="bill-promptpay-inp">PromptPay คนสำรองจ่าย (เบอร์ 10 หลัก / บัตร 13 หลัก)</label>
+                    <input type="text" id="bill-promptpay-inp" class="input-control num" placeholder="089-456-7890" inputmode="numeric">
+                    <span class="field-hint" id="promptpay-validation-hint">เปลี่ยนเป็นเบอร์จริงของคุณเพื่อทดลองสแกนด้วยแอปธนาคารได้ทันที</span>
+                  </div>
+                </div>
+
+                <!-- Friends List -->
+                <div class="field-group" style="margin-top: 0.875rem;">
+                  <label for="new-friend-inp">สมาชิกที่ร่วมหารโต๊ะนี้</label>
+                  <div style="display: flex; gap: 0.5rem;">
+                    <input type="text" id="new-friend-inp" class="input-control" placeholder="เพิ่มชื่อเพื่อน เช่น ฟ้าใส" maxlength="24" style="max-width: 240px;">
+                    <button type="button" id="btn-add-friend" class="btn btn-secondary">เพิ่มเพื่อน</button>
+                  </div>
+                  <div id="friends-bar" class="friends-bar" aria-label="รายชื่อสมาชิกในบิล"></div>
+                </div>
+              </div>
+
+              <!-- Add Dish Form -->
+              <form id="add-dish-form" class="panel-body add-dish-panel" novalidate>
+                <div class="add-dish-grid">
+                  <div class="field-group">
+                    <label for="dish-name-inp">เพิ่มรายการอาหาร / เครื่องดื่ม</label>
+                    <input type="text" id="dish-name-inp" class="input-control" placeholder="เช่น ชุดหมูสไลซ์ใหญ่" required maxlength="50">
+                  </div>
+                  <div class="field-group">
+                    <label for="dish-price-inp">ราคา (บาท)</label>
+                    <input type="number" id="dish-price-inp" class="input-control num" placeholder="259" min="1" step="0.5" required>
+                  </div>
+                  <button type="submit" class="btn btn-primary">เพิ่มเมนู</button>
+                </div>
+              </form>
+
+              <div id="bill-items-list" class="bill-items-list" aria-label="รายการอาหารในบิล"></div>
+
+              <div class="tax-toggles-row">
+                <label class="checkbox-inline">
+                  <input type="checkbox" id="chk-service">
+                  <span>คิด Service Charge 10%</span>
+                </label>
+                <label class="checkbox-inline">
+                  <input type="checkbox" id="chk-vat">
+                  <span>คิด VAT 7%</span>
+                </label>
+                <span style="margin-left: auto;" class="num" id="bill-grand-total-label">ยอดรวมสุทธิ ฿0.00</span>
+              </div>
+            </div>
+
+            <!-- Right: Kram Woven PromptPay Slip & LINE Copy -->
+            <div class="kram-slip-card">
+              <div class="mudmee-strip" aria-hidden="true"></div>
+              <div class="slip-kram-header">
+                <div>
+                  <h2 id="slip-header-title">ตั๋วหารบิลผ้าคราม</h2>
+                  <p class="slip-kram-sub" id="slip-header-sub">แตะชื่อเพื่อนเพื่อดู QR เฉพาะยอดของคนนั้น</p>
+                </div>
+                <span class="nav-pill" id="slip-paid-progress">เก็บแล้ว 0/0</span>
+              </div>
+
+              <div id="share-person-list" class="share-person-list" role="listbox" aria-label="ยอดที่ต้องจ่ายรายบุคคล"></div>
+
+              <!-- Dynamic Scannable QR Stage -->
+              <div class="qr-stage">
+                <div id="qr-svg-container" class="qr-frame" aria-live="polite"></div>
+                <p class="qr-caption-name" id="qr-person-label">เลือกชื่อเพื่อนเพื่อแสดง QR</p>
+                <p class="qr-caption-amount" id="qr-amount-label">฿0.00</p>
+                <p class="qr-caption-note" id="qr-target-label">PromptPay: 089-456-7890 (เบอร์ตัวอย่างสาธิต)</p>
+              </div>
+
+              <!-- Polite LINE Group Message Generator -->
+              <div class="line-reminder-box">
+                <div style="display: flex; align-items: center; justify-content: space-between; gap: 0.5rem;">
+                  <label for="reminder-tone-select" style="font-size: var(--text-xs); font-weight: 600; color: var(--ink-secondary);">โทนข้อความแจ้งเพื่อนใน LINE:</label>
+                  <select id="reminder-tone-select" class="select-control" style="height: 30px; font-size: var(--text-xs);">
+                    <option value="polite">สุภาพเป็นกันเอง</option>
+                    <option value="fun">สายฮาไม่กดดัน</option>
+                    <option value="concise">สั้นกระชับชัดเจน</option>
+                  </select>
+                </div>
+
+                <label for="line-message-output" class="sr-only">ข้อความสรุปยอดสำหรับส่งในกลุ่ม LINE</label>
+                <textarea id="line-message-output" class="line-preview-textarea" readonly></textarea>
+
+                <button type="button" id="btn-copy-line" class="btn btn-primary">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <rect x="9" y="9" width="13" height="13" rx="2"/>
+                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                  </svg>
+                  <span>คัดลอกสรุปบิลส่งเข้ากลุ่ม LINE</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================================================================
+             PANEL 3: กระปุกผ้าครามออมเศษเงิน (Round-up Savings Jars)
+             ================================================================ -->
+        <section
+          id="panel-savings"
+          class="tab-panel"
+          role="tabpanel"
+          aria-labelledby="tab-btn-savings"
+          hidden
+        >
+          <div class="view-header">
+            <div>
+              <h1>กระปุกผ้าครามออมเศษเงินอัตโนมัติ</h1>
+              <p class="view-subtitle">เปลี่ยนเศษเงินจากค่าข้าวและค่ากาแฟแต่ละมื้อให้กลายเป็นเงินก้อนตามเป้าหมาย โดยเก็บยอดจำลองและโอนเข้าบัญชีออมจริงของตนเองได้ทุกเมื่อ</p>
+            </div>
+            <div>
+              <button type="button" id="btn-open-sweep" class="btn btn-primary">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <rect x="3" y="3" width="7" height="7"/>
+                  <rect x="14" y="3" width="7" height="7"/>
+                  <rect x="3" y="14" width="7" height="7"/>
+                  <path d="M14 14h3v3h-3zM18 18h3v3h-3zM14 19h2M19 14v2"/>
+                </svg>
+                <span>โอนยอดสะสมเข้าบัญชีออมจริง</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="savings-top-bar">
+            <div class="savings-summary-strip">
+              <div class="savings-metric-cell">
+                <div class="savings-metric-label">ยอดออมในกระปุกรวมทั้งหมด</div>
+                <div class="savings-metric-val" id="sav-total-all">฿0</div>
+              </div>
+              <div class="savings-metric-cell">
+                <div class="savings-metric-label">ออมจากเศษเงินรอบเดือนนี้</div>
+                <div class="savings-metric-val" id="sav-this-month">฿0</div>
+              </div>
+              <div class="savings-metric-cell">
+                <div class="savings-metric-label">เฉลี่ยเก็บเศษเงินได้ต่อวัน</div>
+                <div class="savings-metric-val" id="sav-daily-rate">฿0 / วัน</div>
+              </div>
+              <div class="savings-metric-cell">
+                <div class="savings-metric-label">ยอดรอโอนเข้าบัญชีออมจริง</div>
+                <div class="savings-metric-val" id="sav-pending-sweep">฿0</div>
+              </div>
+            </div>
+
+            <!-- Round-up Rule Controls -->
+            <div class="savings-rule-bar">
+              <div class="rule-control-cluster">
+                <label for="round-step-select" style="font-size: var(--text-sm); font-weight: 600; color: var(--kram-ink);">กติกาปัดเศษทุกรายจ่าย:</label>
+                <select id="round-step-select" class="select-control">
+                  <option value="10">ปัดขึ้นให้เต็มหลัก 10 บาท (เช่น จ่าย 45 → เก็บ 5฿)</option>
+                  <option value="50">ปัดขึ้นให้เต็มหลัก 50 บาท (เช่น จ่าย 65 → เก็บ 35฿)</option>
+                  <option value="100">ปัดขึ้นให้เต็มหลัก 100 บาท (เช่น จ่าย 120 → เก็บ 80฿)</option>
+                </select>
+
+                <label for="round-mult-select" style="font-size: var(--text-sm); font-weight: 600; color: var(--kram-ink);">ตัวคูณเร่งออม:</label>
+                <select id="round-mult-select" class="select-control">
+                  <option value="1">×1 ปกติ (สบายกระเป๋า)</option>
+                  <option value="2">×2 เร่งออมสองเท่า</option>
+                  <option value="5">×5 โหมดฟิตถึงเป้าไว</option>
+                </select>
+              </div>
+
+              <span style="font-size: var(--text-xs); color: var(--ink-secondary);" id="rule-example-text">ตัวอย่าง: ซื้อกาแฟ 55 ฿ → เก็บเข้ากระปุก +5 ฿</span>
+            </div>
+          </div>
+
+          <!-- Goal Jars Grid + Add New Goal Panel -->
+          <div class="goals-grid" id="goals-grid"></div>
+
+          <div class="work-panel" style="margin-top: 1.25rem;">
+            <div class="panel-header">
+              <h2>สร้างกระปุกเป้าหมายใหม่</h2>
+            </div>
+            <form id="new-goal-form" class="panel-body" novalidate>
+              <div class="new-goal-grid">
+                <div class="field-group">
+                  <label for="goal-name-inp">ชื่อเป้าหมายที่อยากเก็บเงิน</label>
+                  <input type="text" id="goal-name-inp" class="input-control" placeholder="เช่น คอร์สสอบ TOEIC, หูฟังตัดเสียงรบกวน" required maxlength="50">
+                </div>
+                <div class="field-group">
+                  <label for="goal-target-inp">ยอดเป้าหมาย (บาท)</label>
+                  <input type="number" id="goal-target-inp" class="input-control num" placeholder="2500" min="100" step="100" required>
+                </div>
+                <div class="field-group">
+                  <label for="goal-init-inp">ยอดตั้งต้นที่มีอยู่แล้ว (บาท)</label>
+                  <input type="number" id="goal-init-inp" class="input-control num" value="0" min="0" step="50">
+                </div>
+                <button type="submit" class="btn btn-secondary">เพิ่มกระปุก</button>
+              </div>
+            </form>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <!-- Native <dialog> for Non-Custodial Sweep QR Confirmation -->
+  <dialog id="sweep-dialog" class="kram-dialog" aria-labelledby="sweep-dialog-title">
+    <div class="mudmee-strip" aria-hidden="true"></div>
+    <div class="slip-kram-header">
+      <div>
+        <h2 id="sweep-dialog-title">โอนยอดสะสมเข้าบัญชีออมของตนเอง</h2>
+        <p class="slip-kram-sub">สแกนเพื่อย้ายเศษเงินจำลองเข้าบัญชีออมทรัพย์จริงของคุณ</p>
+      </div>
+    </div>
+    <div class="panel-body" style="display: flex; flex-direction: column; align-items: center; text-align: center; gap: 0.75rem;">
+      <div class="field-group" style="width: 100%; text-align: left;">
+        <label for="sweep-promptpay-inp">PromptPay บัญชีออมทรัพย์ของคุณเอง</label>
+        <input type="text" id="sweep-promptpay-inp" class="input-control num" value="089-456-7890">
+      </div>
+      <div id="sweep-qr-box" class="qr-frame"></div>
+      <p class="qr-caption-amount" id="sweep-amount-readout">฿0.00</p>
+      <p class="qr-caption-note">เงินโอนจากบัญชีใช้จ่ายของคุณเข้าบัญชีเงินออมของคุณเองโดยตรง ปลอดภัย 100%</p>
+      <div style="display: flex; gap: 0.5rem; width: 100%; margin-top: 0.25rem;">
+        <button type="button" id="btn-close-sweep" class="btn btn-secondary" style="flex: 1;">ปิดหน้าต่าง</button>
+        <button type="button" id="btn-confirm-sweep" class="btn btn-primary" style="flex: 1;">ยืนยันว่าโอนเก็บแล้ว</button>
+      </div>
+    </div>
+  </dialog>
+
+  <div id="toast-region" class="toast-region" aria-live="polite"></div>
+
+  <script src="qrcode-svg.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
